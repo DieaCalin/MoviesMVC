@@ -84,6 +84,7 @@ function search(value) {
       dataType: 'json',
       data: value,
       success: function(response) {
+        console.log("DB Query done, caching the results");
         if (value) {
           cacheexample[value.toLowerCase()] = response;
         }
@@ -112,6 +113,8 @@ function searchCache() {
       } else {
       for (const [key, value] of Object.entries(cacheexample)) {
         if( keyword.startsWith(key.toLowerCase()) && keyword.toLowerCase() == key.toLowerCase() ) {
+            // Check if keyword is exactly the same as caching
+            // watcht for case sensitive
             foundInCache = 1;
             try {
               render(value);
@@ -138,7 +141,7 @@ function searchCache() {
         try {
           render(innerSearch);
         } catch {
-          console.log("Could not render results.");
+          console.log("Could not render InnerSearch");
         }
         return innerSearch;
         }
@@ -176,6 +179,7 @@ function deleteItem(id) {
 }
 
   function render(response){
+  console.log(response);
   $('#contentTable').empty();
   // For now, models return data in different ways.
   // Some details can be found in moviedetails attribute and others as a whole.
