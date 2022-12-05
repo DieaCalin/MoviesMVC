@@ -21,8 +21,12 @@
     </thead>
     <tbody id="contentTable">
       <?php
-  foreach ($data as $value) {
-  ?>
+      $count = count($data);
+      foreach ($data as $value) {
+      ?>
+      <?php if (--$count <= 0) {
+        break;
+      } ?>
       <tr id="movie-<?php echo $value->MovieID; ?>">
         <td>
           <?php print_r($value->MovieTitle) ?>
@@ -45,7 +49,7 @@
             value="<?php echo $value->MovieID; ?>" id="delete" class="btn btn-danger">Delete</button></td>
       </tr>
       <?php
-  }
+        }
     ?>
     </tbody>
   </table>
@@ -207,5 +211,5 @@ function deleteItem(id) {
 }
 
 </script>
-
+<?php include('templates/footer.php'); ?>
 </html>

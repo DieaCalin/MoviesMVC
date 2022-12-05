@@ -5,7 +5,6 @@ use App\User;
 
 
 class MovieController extends Controller
-
 {
     protected $user;
     public $array;
@@ -49,14 +48,53 @@ class MovieController extends Controller
 		}
 		$pager =  "<nav aria-label='Page navigation'>";
         $pager .= "<ul class='pagination'>";
-        $pager .= "<li><a href='/products?page=1' aria-label='Previous'><span aria-hidden='true'>«</span> Начало</a></li>";
-        for($i=2; $i<=$pages-1; $i++) {
-            $pager .= "<li><a href='/products?page=". $i."'>" . $i ."</a></li>";
+        $pager .= "<li><a href='?page=1' aria-label='Previous'><span aria-hidden='true'>«</span> Back</a></li>";
+        if ($page - 1 >= 5 ) {
+            $lower = $page - 5;
+        } else {
+            $lower = 1;
         }
-        $pager .= "<li><a href='/products?page=". $pages ."' aria-label='Next'>Конец <span aria-hidden='true'>»</span></a></li>";
+        if ($pages-$page>5) {
+            $higher = $page + 5;
+        } else {
+            $higher = $pages;
+        }
+        for($i=$lower; $i<=$higher; $i++) {
+            $pager .= "<li><a href='?page=". $i."'>" . $i ."</a></li>";
+        }
+        $pager .= "<li><a href='?page=". $pages ."' aria-label='Next'><span aria-hidden='true'>»</span></a></li>";
         $pager .= "</ul>";
         return $pager;
 	}
+
+    public function getLimitProducts($leftLimit, $rightLimit) {
+        $result = array();
+        $sql = "SELECT * FROM products LIMIT :leftLimit, :rightLimit";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(":leftLimit", $leftLimit, PDO::PARAM_INT);
+        $stmt->bindValue(":rightLimit", $rightLimit, PDO::PARAM_INT);
+        $stmt->execute();
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result[$row['id']] = $row;
+        }
+        return $result;
+    }
+    public function makeProductPager($allProducts, $totalPages) {
+        if(!isset($_GET['page']) || intval($_GET['page']) == 0 || intval($_GET['page']) == 1 || intval($_GET['page']) < 0) {
+            $pageNumber = 1;
+            $leftLimit = 0;
+            $rightLimit = $this->productsPerPage; // 0-5
+        } elseif (intval($_GET['page']) > $totalPages || intval($_GET['page']) == $totalPages) {
+            $pageNumber = $totalPages; // 2
+            $leftLimit = $this->productsPerPage * ($pageNumber - 1); // 5 * (2-1) = 6
+            $rightLimit = $allProducts; // 8
+        } else {
+            $pageNumber = intval($_GET['page']);
+            $leftLimit = $this->productsPerPage * ($pageNumber-1); // 5* (2-1) = 6
+            $rightLimit = $this->productsPerPage; // 5 -> (6,7,8,9,10)
+        }
+        $this->pageData['productsOnPage'] = $this->Movie->getMovies($leftLimit, $rightLimit);
+    }
 
     public function search($input) {
         $var = isset($input);
@@ -81,8 +119,24 @@ class MovieController extends Controller
         }
         // If an ID is present, render the movie page
         if (!isset($_GET['id'])) {
-            $list = jsonify_reponse($this->Movie->getMovies());
+            $this->productsPerPage = 5;
+            $list = jsonify_reponse($this->Movie->countMovies());
+            $allMovies = count($list);
+            $totalPages = ceil( $allMovies / 5);
+            $this->makeProductPager($allMovies, $totalPages);
+            $pagination = $this->drawPager($allMovies,5);
+            $this->pageData['pagination'] = $pagination;
+            if(!isset($_GET['page'])){
+                $pageNumber = 1;
+            } else {
+                $pageNumber = intval($_GET['page']);
+            }
+            $leftLimit = $this->productsPerPage * ($pageNumber-1); // 5* (2-1) = 6
+            $rightLimit = $this->productsPerPage; // 5 -> (6,7,8,9,10)
+            $list = jsonify_reponse($this->Movie->getMovies($leftLimit, $rightLimit));
+            $list['pagination'] = [ 'page' => $pageNumber, 'pagination_body' => $pagination];
             return $this->view('show.movies', $data = $list);
+
         }
             $movieID = $_GET['id'];
             try {

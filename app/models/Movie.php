@@ -58,7 +58,32 @@ class Movie extends Eloquent
     }
     // $this->hasOne('Model', 'foreign_key', 'local_key');
 
-    public function getMovies()
+    // public function getMovies()
+    // {
+    //     $movie = $this->join(
+    //             'moviedetails',
+    //             'moviedetails.MovieID',
+    //             '=',
+    //             'movies.MovieID'
+    //         )
+    //         ->join(
+    //             'directors',
+    //             'directors.DirectorID',
+    //             '=',
+    //             'movies.DirectorID'
+    //         )
+    //         ->join(
+    //             'genres',
+    //             'genres.GenreID',
+    //             '=',
+    //             'movies.GenreID'
+    //         )
+    //         ->get(
+    //         );
+    //     return $movie;
+    // }
+
+    public function countMovies()
     {
         $movie = $this->join(
                 'moviedetails',
@@ -78,11 +103,35 @@ class Movie extends Eloquent
                 '=',
                 'movies.GenreID'
             )
+            ->get();
+        return $movie;
+    }
+
+    public function getMovies($left,$right)
+    {
+        $movie = $this->join(
+                'moviedetails',
+                'moviedetails.MovieID',
+                '=',
+                'movies.MovieID'
+            )
+            ->join(
+                'directors',
+                'directors.DirectorID',
+                '=',
+                'movies.DirectorID'
+            )
+            ->join(
+                'genres',
+                'genres.GenreID',
+                '=',
+                'movies.GenreID'
+            )
+            ->skip($left)->take($right)
             ->get(
             );
         return $movie;
     }
-
 }
 
 ?>
