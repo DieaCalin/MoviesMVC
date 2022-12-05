@@ -59,6 +59,24 @@ class Directors extends Eloquent
         }
     }
 
+    public function countDirectors()
+    {
+        return $this
+        ->join(
+            'movies',
+            'directors.DirectorID',
+            '=',
+            'movies.DirectorID'
+        )
+        ->distinct()
+        ->groupBy('directors.DirectorID')
+        ->get();
+    }
+
+    public function getDirectors($left,$right) {
+        return $this->skip($left)->take($right)->get();
+    }
+
     public function getall($directorID)
     {
         if (!isset($directorID)) {

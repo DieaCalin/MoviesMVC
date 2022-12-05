@@ -10,8 +10,13 @@
 <body>
     <div id="pagination">
         <?php echo($data['pagination']['pagination_body']); ?>
+        <!-- Limit:
+        <ul>
+          <li><a href="?limit=10"> 10 </a> </li>
+          <li>25</li>
+          <li>10</li>
+        </ul> -->
     </div>
-  This is footer
   <script src="js/scripts.js"></script>
 </body>
 </html>

@@ -18,6 +18,8 @@ class MovieController extends Controller
         $this->directordetails = $this->model('DirectorDetail');
         $this->API = $this->model('api');
         $this->requestBody = jsonify_reponse(file_get_contents('php://input'));
+        $this->utils = new Utils();
+        $this->moviesPerPage = 5;
     }
 
     public function searchpage(){
@@ -30,42 +32,6 @@ class MovieController extends Controller
         $list = jsonify_reponse($this->Movie->getMovies());
         return $this->view('searchpage', $data = $list);
     }
-
-    public function hello(){
-        $array = "string";
-
-        return resp($array);
-    }
-
-    public function drawPager($totalItems, $perPage) {
-		$pages = ceil($totalItems / $perPage);
-		if(!isset($_GET['page']) || intval($_GET['page']) == 0) {
-			$page = 1;
-		} else if (intval($_GET['page']) > $totalItems) {
-			$page = $pages;
-		} else {
-			$page = intval($_GET['page']);
-		}
-		$pager =  "<nav aria-label='Page navigation'>";
-        $pager .= "<ul class='pagination'>";
-        $pager .= "<li><a href='?page=1' aria-label='Previous'><span aria-hidden='true'>«</span> Back</a></li>";
-        if ($page - 1 >= 5 ) {
-            $lower = $page - 5;
-        } else {
-            $lower = 1;
-        }
-        if ($pages-$page>5) {
-            $higher = $page + 5;
-        } else {
-            $higher = $pages;
-        }
-        for($i=$lower; $i<=$higher; $i++) {
-            $pager .= "<li><a href='?page=". $i."'>" . $i ."</a></li>";
-        }
-        $pager .= "<li><a href='?page=". $pages ."' aria-label='Next'><span aria-hidden='true'>»</span></a></li>";
-        $pager .= "</ul>";
-        return $pager;
-	}
 
     public function getLimitProducts($leftLimit, $rightLimit) {
         $result = array();
@@ -83,15 +49,15 @@ class MovieController extends Controller
         if(!isset($_GET['page']) || intval($_GET['page']) == 0 || intval($_GET['page']) == 1 || intval($_GET['page']) < 0) {
             $pageNumber = 1;
             $leftLimit = 0;
-            $rightLimit = $this->productsPerPage; // 0-5
+            $rightLimit = $this->moviesPerPage; // 0-5
         } elseif (intval($_GET['page']) > $totalPages || intval($_GET['page']) == $totalPages) {
             $pageNumber = $totalPages; // 2
-            $leftLimit = $this->productsPerPage * ($pageNumber - 1); // 5 * (2-1) = 6
+            $leftLimit = $this->moviesPerPage * ($pageNumber - 1); // 5 * (2-1) = 6
             $rightLimit = $allProducts; // 8
         } else {
             $pageNumber = intval($_GET['page']);
-            $leftLimit = $this->productsPerPage * ($pageNumber-1); // 5* (2-1) = 6
-            $rightLimit = $this->productsPerPage; // 5 -> (6,7,8,9,10)
+            $leftLimit = $this->moviesPerPage * ($pageNumber-1); // 5* (2-1) = 6
+            $rightLimit = $this->moviesPerPage; // 5 -> (6,7,8,9,10)
         }
         $this->pageData['productsOnPage'] = $this->Movie->getMovies($leftLimit, $rightLimit);
     }
@@ -111,6 +77,9 @@ class MovieController extends Controller
     public function index()
     {
         // Check if search keyword is present in the URL and query the results.
+        if (isset($_GET['limit'])) {
+            $this->moviesPerPage = $_GET['limit'];
+        }
         $filters = get_query_strings();
         if (isset($_GET['q'])) {
             // $list = jsonify_reponse($this->Movie->getMovies());
@@ -119,20 +88,19 @@ class MovieController extends Controller
         }
         // If an ID is present, render the movie page
         if (!isset($_GET['id'])) {
-            $this->productsPerPage = 5;
             $list = jsonify_reponse($this->Movie->countMovies());
             $allMovies = count($list);
-            $totalPages = ceil( $allMovies / 5);
+            $totalPages = ceil( $allMovies / $this->moviesPerPage);
             $this->makeProductPager($allMovies, $totalPages);
-            $pagination = $this->drawPager($allMovies,5);
+            $pagination = $this->utils->drawPager($allMovies, $this->moviesPerPage);
             $this->pageData['pagination'] = $pagination;
             if(!isset($_GET['page'])){
                 $pageNumber = 1;
             } else {
                 $pageNumber = intval($_GET['page']);
             }
-            $leftLimit = $this->productsPerPage * ($pageNumber-1); // 5* (2-1) = 6
-            $rightLimit = $this->productsPerPage; // 5 -> (6,7,8,9,10)
+            $leftLimit = $this->moviesPerPage * ($pageNumber-1); // 5* (2-1) = 6
+            $rightLimit = $this->moviesPerPage; // 5 -> (6,7,8,9,10)
             $list = jsonify_reponse($this->Movie->getMovies($leftLimit, $rightLimit));
             $list['pagination'] = [ 'page' => $pageNumber, 'pagination_body' => $pagination];
             return $this->view('show.movies', $data = $list);

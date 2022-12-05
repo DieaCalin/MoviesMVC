@@ -17,7 +17,11 @@
     </thead>
     <tbody>
       <?php
+      $count = count($data);
   foreach ($data as $value) {
+  if (--$count <= 0) {
+      break;
+  }
   ?>
       <tr>
         <td>
