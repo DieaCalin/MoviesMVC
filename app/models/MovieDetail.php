@@ -15,7 +15,11 @@ class moviedetail extends Eloquent
 
     public function search($input) {
         $results = $this
-        ->where('MovieTitle', 'LIKE', '%'.$input.'%')
+        // ->where('MovieTitle', 'LIKE', '%'.$input.'%')
+        ::whereRaw(
+	        "MATCH(MovieTitle) AGAINST(?)",
+	        array($input)
+	    )
         ->join(
             'movies',
             'moviedetails.MovieID',

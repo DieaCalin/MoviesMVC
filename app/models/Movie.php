@@ -107,7 +107,7 @@ class Movie extends Eloquent
         return $movie;
     }
 
-    public function getMovies($left,$right)
+    public function getMovies($left=0,$right=10)
     {
         $movie = $this->join(
                 'moviedetails',
