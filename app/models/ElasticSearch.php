@@ -28,14 +28,14 @@ class Elastic {
     }
 
     // search movie by title
-    public function search($query = []) {
+    public function get($query = '') {
         $params = [
             'index' => $this->index,
             'type' => $this->type,
             'body' => [
                 'query' => [
                     'match' => [
-                        'MovieTitle' => '2001'
+                        'MovieTitle' => $query,
                     ]
                 ]
             ]

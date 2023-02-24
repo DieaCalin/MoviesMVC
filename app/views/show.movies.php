@@ -29,7 +29,7 @@
       } ?>
       <tr id="movie-<?php echo $value->MovieID; ?>">
         <td>
-          <?php print_r($value->MovieTitle) ?>
+          <?php print_r($value->MovieTitle ) ?>
         </td>
         <td>
           <?php print_r($value->DirectorName) ?>
@@ -92,7 +92,13 @@ function search(value) {
         if (value) {
           cacheexample[value.toLowerCase()] = response;
         }
-        render(response);
+
+        if ( typeof response['hits'] !== 'undefined' ) {
+          render(response['hits']['hits'] );
+        } else {
+          console.log("response", response);
+          render(response);
+        }
         return response;
       },
     });
@@ -183,12 +189,14 @@ function deleteItem(id) {
 }
 
   function render(response){
-  console.log(response);
+
   $('#contentTable').empty();
   // For now, models return data in different ways.
   // Some details can be found in moviedetails attribute and others as a whole.
-  for(const entry of response){
-
+  for(var entry of response){
+    if ( entry._source ) {
+      entry = entry._source;
+    }
     var MovieTitle = entry.MovieTitle;
     var Director = entry.DirectorName;
     var Genre = entry.GenreName;

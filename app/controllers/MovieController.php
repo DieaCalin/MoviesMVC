@@ -20,18 +20,20 @@ class MovieController extends Controller
         $this->requestBody = jsonify_reponse(file_get_contents('php://input'));
         $this->utils = new Utils();
         $this->moviesPerPage = 5;
+        $this->ESclient = $this->elastic();
+
     }
 
-    public function searchpage(){
-        $filters = get_query_strings();
-        if (isset($_GET['q'])) {
-            // $list = jsonify_reponse($this->Movie->getMovies());
-            $list= jsonify_reponse($this->moviedetails->search($filters['q']));
-            return $this->view('searchpage', $data = $list);
-        }
-        $list = jsonify_reponse($this->Movie->getMovies());
-        return $this->view('searchpage', $data = $list);
-    }
+    // public function searchpage(){
+    //     $filters = get_query_strings();
+    //     if (isset($_GET['q'])) {
+    //         // $list = jsonify_reponse($this->Movie->getMovies());
+    //         $list= jsonify_reponse($this->moviedetails->search($filters['q']));
+    //         return $this->view('searchpage', $data = $list);
+    //     }
+    //     $list = jsonify_reponse($this->Movie->getMovies());
+    //     return $this->view('searchpage', $data = $list);
+    // }
 
     public function getLimitProducts($leftLimit, $rightLimit) {
         $result = array();
@@ -63,13 +65,12 @@ class MovieController extends Controller
     }
 
     public function search($input) {
-        $var = isset($input);
         if($input === "false") {
-            $b = 1;
-            $list = $this->Movie->getMovies();
-            echo $list;
+                $b = 1;
+                $list = $this->Movie->getMovies();
+                echo $list;
         } else {
-        $response= $this->moviedetails->search($input);
+        $response = $this->ESclient->get($input);
         echo $response;
         }
     }
