@@ -1,9 +1,16 @@
 {
     "config" : {
-        "platform-check": false
+        "platform-check": false,
+        "platform": {
+            "php": "7.4.21"
+         },
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     },
     "require": {
-        "illuminate/database": "^8.83"
+        "illuminate/database": "^8.83",
+        "elasticsearch/elasticsearch": "^8.6"
     },
     "autoload": {
         "classmap" : [

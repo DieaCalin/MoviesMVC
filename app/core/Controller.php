@@ -8,4 +8,8 @@ class Controller {
     public function view($view, $data = [] ) {
         require_once '../app/views/' . $view . '.php';
     }
+    public function Elastic(){
+        require_once '../app/models/ElasticSearch.php';
+        return new Elastic();
+    }
 }

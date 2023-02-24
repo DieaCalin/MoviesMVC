@@ -164,7 +164,7 @@ class MovieController extends Controller
     public function delete()
     {
         $this->Movie::destroy($this->requestBody);
-        $this->moviedetails::destroy($this->requestBody);
+        $this->moviedetails::where('MovieID',$this->requestBody)->delete();
         return "200";
         // response in http
     }
