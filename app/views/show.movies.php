@@ -89,16 +89,20 @@ function search(value) {
       data: value,
       success: function(response) {
 
-        // if (value) {
-        //   cacheexample[value.toLowerCase()] = response.hits.hits;
-        // }
+        if (value) {
+          cacheexample[value.toLowerCase()] = response.hits.hits;
+          render(response.hits.hits);
+          return response.hits.hits;
+        }
 
         if ( typeof response['hits'] !== 'undefined' ) {
+          console.log(response['hits']['hits'])
           render(response['hits']['hits'] );
           return response['hits']['hits'];
         } else {
           console.log("response", response);
           render(response);
+          return response;
         }
         return response;
       },
