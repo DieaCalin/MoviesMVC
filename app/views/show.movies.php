@@ -88,13 +88,14 @@ function search(value) {
       dataType: 'json',
       data: value,
       success: function(response) {
-        console.log("DB Query done, caching the results");
-        if (value) {
-          cacheexample[value.toLowerCase()] = response;
-        }
+
+        // if (value) {
+        //   cacheexample[value.toLowerCase()] = response.hits.hits;
+        // }
 
         if ( typeof response['hits'] !== 'undefined' ) {
           render(response['hits']['hits'] );
+          return response['hits']['hits'];
         } else {
           console.log("response", response);
           render(response);
@@ -112,6 +113,7 @@ function searchCache() {
   foundInCache = 0;
     if(myInput.value) {
       var keyword = myInput.value;
+      console.log("keyword", keyword)
       const url = new URL(window.location.href);
       url.searchParams.set('q', myInput.value);
       window.history.replaceState(null, null, url); // or pushState
@@ -119,9 +121,11 @@ function searchCache() {
         foundInCache = 0;
         var DBterm = myInput.value;
         var DBQuery = search(myInput.value);
+        console.log("DBQuery", DBQuery)
         cacheexample[DBterm] = DBQuery;
       } else {
       for (const [key, value] of Object.entries(cacheexample)) {
+        console.log("Object", key, value)
         if( keyword.startsWith(key.toLowerCase()) && keyword.toLowerCase() == key.toLowerCase() ) {
             // Check if keyword is exactly the same as caching
             // watcht for case sensitive
@@ -139,6 +143,7 @@ function searchCache() {
         else if( keyword.toLowerCase().startsWith(key.toLowerCase()) ) {
             var innerSearch = [];
             value.forEach((item, index)=>{
+              console.log("item", item)
                 // find titles matching the keyword
                 let movieTitle = item.MovieTitle;
                 movieTitle = movieTitle.toLowerCase();

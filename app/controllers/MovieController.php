@@ -66,9 +66,9 @@ class MovieController extends Controller
 
     public function search($input) {
         if($input === "false") {
-                $b = 1;
-                $list = $this->Movie->getMovies();
-                echo $list;
+            $b = 1;
+            $list = $this->Movie->getMovies();
+            echo $list;
         } else {
         $response = $this->ESclient->get($input);
         echo $response;

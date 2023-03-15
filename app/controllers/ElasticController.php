@@ -1,30 +1,44 @@
 <?php
-// import elastic search class
+require_once '../vendor/autoload.php';
+use Elastic\Elasticsearch\ClientBuilder;
 
-class ElasticController extends Controller {
+class Elastic {
+    private static $client;
+    private $index;
+    private $type;
+    private $host;
+    private $port;
+    private $username;
+    private $password;
 
-    public function __construct()
-    {
-        $this->ESclient = $this->elastic();
-    }
-    public function index()
-    {
-        $response = $this->ESclient->get(['MovieTitle' => '2001']);
-        // echo MovieTitle from response
-        foreach ($response['hits']['hits'] as $hit) {
-            echo $hit['_source']['MovieTitle'];
+    public function __construct() {
+        $this->index = 'movies';
+        $this->host = 'localhost';
+        $this->port = '9200';
+        $this->username = 'george';
+        $this->password = '123456';
+        if (!isset(self::$client)) {
+            self::$client = ClientBuilder::create()
+                ->setHosts([$this->host . ':' . $this->port])
+                ->setBasicAuthentication($this->username, $this->password)
+                ->build();
         }
-        return $response;
     }
 
-    // function for search
-    public function search($query = [])
-    {
-        $response = $this->ESclient->get($query);
-        // echo MovieTitle from response
-        foreach ($response['hits']['hits'] as $hit) {
-            echo $hit['_source']['MovieTitle'];
-        }
+    // search movie by title
+    public function get($query = '') {
+        $params = [
+            'index' => $this->index,
+            'type' => $this->type,
+            'body' => [
+                'query' => [
+                    'match' => [
+                        'MovieTitle' => $query,
+                    ]
+                ]
+            ]
+        ];
+        $response = self::$client->search($params);
         return $response;
     }
 }
