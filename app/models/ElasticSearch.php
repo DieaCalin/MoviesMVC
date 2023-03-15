@@ -3,7 +3,7 @@ require_once '../vendor/autoload.php';
 use Elastic\Elasticsearch\ClientBuilder;
 
 class Elastic {
-    private $client;
+    private static $client;
     private $index;
     private $type;
     private $host;
@@ -17,14 +17,12 @@ class Elastic {
         $this->port = '9200';
         $this->username = 'george';
         $this->password = '123456';
-        $this->client = ClientBuilder::create()
-            ->setHosts([$this->host . ':' . $this->port])
-            ->setBasicAuthentication($this->username, $this->password)
-            ->build();
-    }
-    // return connection
-    public function getClient() {
-        return $this->client;
+        if (!isset(self::$client)) {
+            self::$client = ClientBuilder::create()
+                ->setHosts([$this->host . ':' . $this->port])
+                ->setBasicAuthentication($this->username, $this->password)
+                ->build();
+        }
     }
 
     // search movie by title
@@ -40,7 +38,7 @@ class Elastic {
                 ]
             ]
         ];
-        $response = $this->client->search($params);
+        $response = self::$client->search($params);
         return $response;
     }
 }
